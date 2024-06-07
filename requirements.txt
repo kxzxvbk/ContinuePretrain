@@ -4,3 +4,4 @@ tiktoken
 evaluate
 accelerate
 flash-attn --no-build-isolation
+wandb

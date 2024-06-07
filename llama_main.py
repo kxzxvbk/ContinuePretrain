@@ -134,7 +134,7 @@ if __name__ == '__main__':
         save_strategy="steps",
         save_steps=500,
         save_total_limit=1,
-        report_to=None,
+        report_to='wandb',
         remove_unused_columns=False,
         per_device_train_batch_size=1,
         per_device_eval_batch_size=2,

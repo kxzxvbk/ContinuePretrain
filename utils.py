@@ -32,12 +32,17 @@ class KLRegTrainer(Trainer):
 
         loss_dict, output_dict = {}, {}
         total_loss = 0
-        for key in inputs.keys():
-            loss, output = calc_kl_reg_loss(inputs[key])
-            loss_dict[key + '_loss'] = loss.item()
-            output_dict[key] = output
+        if 'input_ids' not in inputs.keys():
+            for key in inputs.keys():
+                loss, output = calc_kl_reg_loss(inputs[key])
+                loss_dict[key + '_loss'] = loss.item()
+                output_dict[key] = output
+                total_loss += loss
+            self.log(loss_dict)
+        else:
+            loss, output = calc_kl_reg_loss(inputs)
             total_loss += loss
-        self.log(loss_dict)
+            output_dict['evaluate'] = output
         if return_outputs:
             return total_loss, output_dict
         else:
