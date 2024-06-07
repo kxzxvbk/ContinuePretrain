@@ -74,15 +74,18 @@ def compute_metrics(pred):
 
 
 def prepare_dataset(tokenizer, train_data_dir, test_data_dir):
-    train_data_cfg = [{"token_num": int(1e9),
-                       "dataset": {"name": "WanJuanCC", "data_dir": "/data1/share/OpenDataLab___WanJuanCC"}},
-                      {"token_num": int(1e9),
-                       "dataset": {"name": "MasterMindDou", "split": "train"}},
+    train_data_cfg = [{"token_num": int(1e8),
+                       "dataset": {"name": "WanJuanCC",
+                                   "data_dir": "/data/share/OpenDataLab___WanJuanCC/extracted/jsonl"}},
+                      {"token_num": int(1e8),
+                       "dataset": {"name": "MasterMindDou", "split": "train",
+                                   "cache_dir": "/data/niuyazhe/data/mastermind/data/doudizhu"}},
                       {"token_num": int(1e8),
                        "dataset": {"name": "AlpacaInstruct"}},
                       ]
     test_data_cfg = [{"token_num": int(1e9),
-                       "dataset": {"name": "MasterMindDou", "split": "test"}}
+                       "dataset": {"name": "MasterMindDou", "split": "test",
+                                   "cache_dir": "/data/niuyazhe/data/mastermind/data/doudizhu"}}
                       ]
     if not os.path.exists(train_data_dir):
         mix_datasets(train_data_cfg, train_data_dir)

@@ -7,7 +7,7 @@ class KLRegTrainer(Trainer):
     def __init__(self, kl_weight, orig_model, *args, **kwargs):
         self.kl_weight = kl_weight
         self.orig_model = orig_model
-        super(KLRegTrainer, self).__init__(args, **kwargs)
+        super(KLRegTrainer, self).__init__(*args, **kwargs)
 
     def _calc_kl_div(self, x1, x2, label):
         log_dis1 = F.log_softmax(x1, dim=-1)

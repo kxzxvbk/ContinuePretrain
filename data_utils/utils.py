@@ -3,6 +3,7 @@ import random
 from typing import Dict, List, Tuple
 
 import torch
+import numpy as np
 import tiktoken
 import pandas as pd
 from torch.utils.data import Dataset
@@ -72,9 +73,10 @@ class MaskedSFTDataset(Dataset):
     def __len__(self):
         return len(self.data)
 
-    def create_inputs_and_labels(self, content: str, mask: List, source: str) -> Tuple[torch.Tensor, torch.Tensor, str]:
+    def create_inputs_and_labels(self, content: str, mask: np.Array, source: str) -> \
+            Tuple[torch.Tensor, torch.Tensor, str]:
         # Slice the input content.
-        mask.sort(key=lambda x: x[0])
+        mask = np.sort(mask, axis=0)
         begin_idx = 0
         slices = []
         for m in mask:
