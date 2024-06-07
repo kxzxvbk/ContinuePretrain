@@ -97,7 +97,7 @@ def prepare_dataset(tokenizer, train_data_dir, test_data_dir):
 if __name__ == '__main__':
     random.seed(0)
     parser = argparse.ArgumentParser()
-    parser.add_argument('--kl_weight', type=float, default=0.01)
+    parser.add_argument('--kl_weight', type=float, default=0)
     parser.add_argument('--train_dataset', type=str, default="./mixed_datasets/train_dataset.parquet")
     parser.add_argument('--test_dataset', type=str, default="./mixed_datasets/test_dataset.parquet")
     parser.add_argument('--out_dir', type=str, default="./llama_mastermind_dou")
