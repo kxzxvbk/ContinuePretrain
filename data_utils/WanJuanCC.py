@@ -40,7 +40,7 @@ class WanJuanCCDataset(Dataset):
 
     def __len__(self):
         # Estimate length
-        return 100000000
+        return int(2e11)
 
     def __getitem__(self, idx):
         if self.current_line >= len(self.current_chunk):

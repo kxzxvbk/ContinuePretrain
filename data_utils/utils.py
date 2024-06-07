@@ -64,16 +64,17 @@ def load_parquet_dataset(dataset_path):
 
 
 class MaskedSFTDataset(Dataset):
-    def __init__(self, data, tokenizer, max_token=2048):
+    def __init__(self, data, tokenizer, train: bool, max_token=2048):
         super().__init__()
         self.data = data
         self.tokenizer = tokenizer
         self.max_token = max_token
+        self.train = train
 
     def __len__(self):
         return len(self.data)
 
-    def create_inputs_and_labels(self, content: str, mask: np.Array, source: str) -> \
+    def create_inputs_and_labels(self, content: str, mask: np.array, source: str) -> \
             Tuple[torch.Tensor, torch.Tensor, str]:
         # Slice the input content.
         mask = np.sort(mask, axis=0)
@@ -82,33 +83,38 @@ class MaskedSFTDataset(Dataset):
         for m in mask:
             if m[0] > begin_idx:
                 slices.append([content[begin_idx: m[0]], -100])
-            slices.append(content[m[0]: m[1], 0])
+            slices.append([content[m[0]: m[1]], 0])
             begin_idx = m[1]
         if begin_idx < len(content):
             slices.append([content[begin_idx:], 0])
 
         # Tokenize each slice of the original content.
-        inputs = self.tokenizer.encode(slices[0], add_special_tokens=True)
-        labels = inputs if slices[0] == 0 else [-100] * len(inputs)
+        inputs = self.tokenizer.encode(slices[0][0], add_special_tokens=True)
+        labels = inputs if slices[0][1] == 0 else [-100] * len(inputs)
         for sli in slices[1:]:
-            new_inputs = self.tokenizer.encode(sli, add_special_tokens=False)
+            new_inputs = self.tokenizer.encode(sli[0], add_special_tokens=False)
             inputs += new_inputs
             labels += new_inputs if sli[1] == 0 else [-100] * len(new_inputs)
 
         # Add [eop] token and convert into tensor.
         eop = self.tokenizer.eos_token_id
-        inputs = torch.tensor(inputs[:self.max_token] + eop)
-        labels = torch.tensor(labels[:self.max_token] + eop)
+        inputs = torch.tensor(inputs[:self.max_token] + [eop])
+        labels = torch.tensor(labels[:self.max_token] + [eop])
 
         return inputs, labels, source
 
     def __getitem__(self, index):
         item_data = self.data[index]
         input_ids, labels, source = self.create_inputs_and_labels(**item_data)
-        return {"input_ids": input_ids, "labels": labels, "source": source}
+        if self.train:
+            return {"input_ids": input_ids, "labels": labels, "source": source}
+        else:
+            return {"input_ids": input_ids, "labels": labels}
 
 
 def collate_fn(batch):
+    if 'source' not in batch[0]:
+        return collate_single_fn(batch)
     dict_data = {}
     for i in range(len(batch)):
         sample = batch[i]
