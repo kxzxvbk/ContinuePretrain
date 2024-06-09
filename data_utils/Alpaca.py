@@ -10,7 +10,7 @@ class AlpacaInstructDataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, index):
-        sample = self.data[index]
+        sample = self.data['train'][index]
         res_dict = {
             'content': sample['prompt'],
             'mask': [[0, len(sample['prompt']) - len(sample['output'])]],

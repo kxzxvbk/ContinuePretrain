@@ -5,6 +5,7 @@ import argparse
 
 import torch
 import evaluate
+from accelerate import Accelerator
 from transformers import TrainingArguments, AutoTokenizer, AutoModelForCausalLM
 
 from data_utils import MaskedSFTDataset, mix_datasets, load_parquet_dataset, collate_fn
@@ -109,13 +110,15 @@ if __name__ == '__main__':
     kl_weight = args.kl_weight
 
     # Initialize base model.
+    device_index = Accelerator().process_index
+    device_map = {"": device_index}
     tokenizer = AutoTokenizer.from_pretrained(args.base_model, trust_remote_code=True)
     model = AutoModelForCausalLM.from_pretrained(args.base_model, trust_remote_code=True, revision='main',
-                                                 device_map='auto', torch_dtype=torch.bfloat16,
+                                                 device_map=device_map, torch_dtype=torch.bfloat16,
                                                  attn_implementation="flash_attention_2")
     if kl_weight > 0:
         orig_model = AutoModelForCausalLM.from_pretrained(args.base_model, trust_remote_code=True, revision='main',
-                                                          device_map={"": 0}, torch_dtype=torch.bfloat16,
+                                                          device_map=device_map, torch_dtype=torch.bfloat16,
                                                           attn_implementation="flash_attention_2")
         orig_model.eval()
     else:
@@ -144,7 +147,9 @@ if __name__ == '__main__':
         weight_decay=0.01,
         bf16=True,
         tf32=True,
-        gradient_accumulation_steps=5
+        gradient_accumulation_steps=5,
+        ddp_find_unused_parameters=False,
+        deepspeed='ds_config.json'
     )
     trainer = KLRegTrainer(
         kl_weight=kl_weight,
