@@ -35,9 +35,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--kl_weight', type=float, default=0)
     parser.add_argument('--train_dataset', type=str, default="./mixed_datasets/train_dataset.parquet")
-    parser.add_argument('--test_num', type=int, default=2000)
+    parser.add_argument('--eval_num', type=int, default=2000)
     parser.add_argument('--out_dir', type=str, default="./default_output")
-    parser.add_argument('--base_model', type=str, default="PATH-TO-MODEL")
+    parser.add_argument('--base_model', type=str, default="/data/share/llama3.1-8b-base/")
     args = parser.parse_args()
     kl_weight = args.kl_weight
 

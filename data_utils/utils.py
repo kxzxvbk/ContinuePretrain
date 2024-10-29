@@ -11,11 +11,17 @@ from torch.utils.data import Dataset
 from .WanJuanCC import WanJuanCCDataset
 from .MasterMind import MasterMindDouDataset
 from .Alpaca import AlpacaInstructDataset
+from .Arxiver import ArxiverDataset
+from .StarCoder import StarCoderDataset
+from .AlgebraicStack import AlgebraicStackDataset
 
 name2dataset = {
     'WanJuanCC': WanJuanCCDataset,
     'MasterMindDou': MasterMindDouDataset,
-    'AlpacaInstruct': AlpacaInstructDataset
+    'AlpacaInstruct': AlpacaInstructDataset,
+    'Arxiver': ArxiverDataset,
+    'StarCoder': StarCoderDataset,
+    'AlgebraicStack': AlgebraicStackDataset
 }
 
 
@@ -48,7 +54,7 @@ def mix_datasets(datasets_config: List[Dict], target_dir: str) -> None:
         while token_num < max_token_num and idx < len(dataset):
             sample = dataset[idx]
             total_dataset.append(sample)
-            token_num += len(encoding.encode(sample['content']))
+            token_num += len(encoding.encode(sample['content'], disallowed_special=()))
             idx += 1
         if token_num < max_token_num:
             warnings.warn(f"No enough tokens. Target: {max_token_num}, Exact: {token_num}")

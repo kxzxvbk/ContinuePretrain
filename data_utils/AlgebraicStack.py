@@ -1,5 +1,4 @@
 import os
-from data_utils.utils import load_parquet_dataset
 from torch.utils.data import Dataset
 
 
@@ -17,8 +16,9 @@ class AlgebraicStackDataset(Dataset):
             - data_dir: The root directory for downloaded extracted files, which should contain several jsonl files.
             - chunk_size: How many data samples to load for one time.
         """
+        from data_utils.utils import load_parquet_dataset
         self.data_dir = os.path.join(data_dir, 'train')
-        self.files = [os.path.join(data_dir, f) for f in os.listdir(data_dir)
+        self.files = [os.path.join(self.data_dir, f) for f in os.listdir(self.data_dir)
                       if f.endswith('.parquet') and f.startswith(language)]
         self.chunk_size = chunk_size
         self.par_idx = 0
@@ -34,11 +34,12 @@ class AlgebraicStackDataset(Dataset):
         while len(self.current_chunk) < self.chunk_size and self.current_file is not None:
             self.current_chunk.append(self.current_file[self.current_file_idx])
             self.current_file_idx += 1
-            if self.current_file_idx > len(self.current_file):
+            if self.current_file_idx >= len(self.current_file):
                 self.par_idx += 1
                 if self.par_idx >= len(self.files):
                     self.current_file = None
                 else:
+                    from data_utils.utils import load_parquet_dataset
                     self.current_file = load_parquet_dataset(self.files[self.par_idx])
                     self.current_file_idx = 0
         self.current_line = 0
